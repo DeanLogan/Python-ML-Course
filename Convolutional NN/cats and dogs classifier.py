@@ -23,7 +23,7 @@ for image, label in raw_train.take(2):
     plt.figure()
     plt.imshow(image)
     plt.title(get_label_name(label))
-plt.show()
+#plt.show()
 
 # Data Preprocessing
 
@@ -43,7 +43,7 @@ for image, label in train.take(2):
     plt.figure()
     plt.imshow(image)
     plt.title(get_label_name(label))
-plt.show()
+#plt.show()
 
 BATCH_SIZE = 32
 SHUFFLE_BUFFER_SIZE = 1000
@@ -57,3 +57,62 @@ for img, label in raw_train.take(2):
 
 for img, label in train.take(2):
     print("New shape: ", img.shape)
+
+IMG_SHAPE = (IMG_SIZE, IMG_SIZE, 3)
+
+# Create the base model from the pre-trained model MobileNet V2
+base_model = tf.keras.applications.MobileNetV2(
+    input_shape=IMG_SHAPE,
+    include_top=False,
+    weights='imagenet'
+)
+
+#base_model.summary() # uncomment to see summary for pre-trained model
+
+for image, _ in train_batches.take(1):
+    pass
+
+feature_batch = base_model(image)
+print(feature_batch.shape)
+
+base_model.trainable = False # freezing the base model so that it won't be trained again
+
+# Adding our Classifier
+
+global_average_layer = tf.keras.layers.GlobalAveragePooling2D() # flattening 
+prediction_layer = keras.layers.Dense(1)
+
+model = tf.keras.Sequential([
+    base_model,
+    global_average_layer,
+    prediction_layer
+])
+
+model.summary()
+
+# Training the Model
+
+base_learning_rate = 0.0001
+model.compile(
+    optimizer=tf.keras.optimizers.RMSprop(lr=base_learning_rate),
+    loss=tf.keras.losses.BinaryCrossentropy(from_logits=True),
+    metrics=['accuracy']
+)
+
+# We can evaluate the model right now to see how it does before training it on our new images
+initial_epochs=3
+validation_steps=20
+
+loss0,accuracy0=model.evaluate(validation_batches, steps=validation_steps)
+
+# Now we can train it on our images
+history = model.fit(
+    train_batches,
+    epochs=initial_epochs,
+    validation_data=validation_batches
+)
+
+acc = history.history['accuracy']
+print(acc)
+
+model.save('dogs_vs_cats.h5')
