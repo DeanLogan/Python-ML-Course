@@ -32,6 +32,7 @@ datagen = ImageDataGenerator(
 
 # pick an image to transform
 test_img = train_images[14]
+print(f"this is test_img {test_img}")
 img = tf.keras.utils.img_to_array(test_img) # convert image to numpy array
 img = img.reshape((1,) + img.shape) # reshape image
 

@@ -27,7 +27,7 @@ for image, label in raw_train.take(2):
 
 # Data Preprocessing
 
-IMG_SIZE = 160 #All images will be resized to 160x160
+IMG_SIZE = 160 # All images will be resized to 160x160
 
 def format_example(image, label): # returns an image that is reshaped to IMG_SIZE
     image = tf.cast(image, tf.float32)
@@ -67,7 +67,7 @@ base_model = tf.keras.applications.MobileNetV2(
     weights='imagenet'
 )
 
-#base_model.summary() # uncomment to see summary for pre-trained model
+# base_model.summary() # uncomment to see summary for pre-trained model
 
 for image, _ in train_batches.take(1):
     pass
