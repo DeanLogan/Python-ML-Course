@@ -114,38 +114,35 @@ except:
         metrics=['accuracy']
     )
 
+    # 8
     history = model.fit(x=train_data_gen, steps_per_epoch=12, epochs=epochs, validation_data=val_data_gen, validation_steps=5)
 
-    model.save(MODEL_DIR)
+    model.save(MODEL_DIR) # saves model to avoid having to train it every time 
 
+    # 9
+    acc = history.history['accuracy'] 
+    val_acc = history.history['val_accuracy'] 
 
-# 8
-history = model.fit(x=train_data_gen, steps_per_epoch=12, epochs=epochs, validation_data=val_data_gen, validation_steps=5)
+    loss = history.history['loss'] 
+    val_loss = history.history['val_loss'] 
+
+    epochs_range = range(epochs)
+
+    plt.figure(figsize=(8, 8))
+    plt.subplot(1, 2, 1)
+    plt.plot(epochs_range, acc, label='Training Accuracy')
+    plt.plot(epochs_range, val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.title('Training and Validation Accuracy')
+
+    plt.subplot(1, 2, 2)
+    plt.plot(epochs_range, loss, label='Training Loss')
+    plt.plot(epochs_range, val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.title('Training and Validation Loss')
+    plt.show()
 
 model.summary()
-
-# 9
-acc = history.history['accuracy'] # from orignal if using model.fit()
-val_acc = history.history['val_accuracy'] # from orignal if using model.fit()
-
-loss = history.history['loss'] # from orignal if using model.fit()
-val_loss = history.history['val_loss'] # from orignal if using model.fit()
-
-epochs_range = range(epochs)
-
-plt.figure(figsize=(8, 8))
-plt.subplot(1, 2, 1)
-plt.plot(epochs_range, acc, label='Training Accuracy')
-plt.plot(epochs_range, val_acc, label='Validation Accuracy')
-plt.legend(loc='lower right')
-plt.title('Training and Validation Accuracy')
-
-plt.subplot(1, 2, 2)
-plt.plot(epochs_range, loss, label='Training Loss')
-plt.plot(epochs_range, val_loss, label='Validation Loss')
-plt.legend(loc='upper right')
-plt.title('Training and Validation Loss')
-plt.show()
 
 # 10
 predictions = model.predict(test_data_gen)

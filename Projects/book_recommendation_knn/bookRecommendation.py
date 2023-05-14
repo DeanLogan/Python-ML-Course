@@ -31,3 +31,16 @@ df_ratings = pd.read_csv(
     usecols=['user', 'isbn', 'rating'],
     dtype={'user': 'int32', 'isbn': 'str', 'rating': 'float32'})
 
+
+dfb = df_ratings.groupby(["isbn"]).count().reset_index()
+good_books = dfb.loc[dfb["rating"] >= 100]["isbn"]
+
+# books contains those have no less than 100 ratings
+good_books = df_books.loc[df_books["isbn"].isin(good_books)]
+
+dfu = df_ratings[["user", "rating"]].groupby(["user"]).count().reset_index()
+
+good_users = dfu.loc[dfu["rating"] >= 200]["user"]
+
+df = df_ratings.loc[df_ratings["user"].isin(good_users)]
+df = df.loc[df["isbn"].isin(good_books["isbn"])]
