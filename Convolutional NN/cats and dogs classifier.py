@@ -115,4 +115,6 @@ history = model.fit(
 acc = history.history['accuracy']
 print(acc)
 
-model.save('dogs_vs_cats.h5')
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+PATH = os.path.join(ROOT_DIR, 'dogs_vs_cats.h5')
+model.save(PATH)

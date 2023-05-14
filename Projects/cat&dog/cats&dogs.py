@@ -67,7 +67,7 @@ def plotImages(images_arr, probabilities = False):
                 ax.set_title("%.2f" % ((1-probability)*100) + "% cat")
     plt.show()
 
-sample_training_images, _ = next(train_data_gen)
+#sample_training_images, _ = next(train_data_gen)
 #plotImages(sample_training_images[:5])
 
 # 5
@@ -85,20 +85,21 @@ train_image_generator = ImageDataGenerator(
 # 6
 train_data_gen = train_image_generator.flow_from_directory(batch_size=batch_size, directory=train_dir, target_size=(IMG_HEIGHT, IMG_WIDTH), class_mode='binary')
 
-augmented_images = [train_data_gen[0][0][0] for i in range(5)]
+#augmented_images = [train_data_gen[0][0][0] for i in range(5)]
 
 #plotImages(augmented_images)
 
 
 
-MODEL_DIR = os.path.join(ROOT_DIR, 'model')
+MODEL_DIR = os.path.join(ROOT_DIR, 'model.h5')
 try:
     print("saved")
     model = tf.keras.models.load_model(MODEL_DIR)
 except:
     # 7
     model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_HEIGHT, IMG_WIDTH, 3))) 
+    model.add(tf.keras.layers.Input(shape=(IMG_HEIGHT, IMG_WIDTH, 3))),
+    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu'))
     model.add(tf.keras.layers.MaxPooling2D((2, 2))) 
     model.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu')) 
     model.add(tf.keras.layers.MaxPooling2D((2,2)))
@@ -113,24 +114,22 @@ except:
         metrics=['accuracy']
     )
 
-    # 8
-    history = model.fit(x=train_data_gen, steps_per_epoch=12, epochs=epochs, validation_data=val_data_gen, validation_steps=15)
+    history = model.fit(x=train_data_gen, steps_per_epoch=12, epochs=epochs, validation_data=val_data_gen, validation_steps=5)
 
     model.save(MODEL_DIR)
 
-loss0,accuracy0=model.evaluate(val_data_gen, steps=15)
-loss0,accuracy0=model.evaluate(train_data_gen, steps=15)
 
-#history = model.fit(x=train_data_gen, steps_per_epoch=12, epochs=epochs, validation_data=val_data_gen, validation_steps=15)
+# 8
+history = model.fit(x=train_data_gen, steps_per_epoch=12, epochs=epochs, validation_data=val_data_gen, validation_steps=5)
 
-# model.summary()
+model.summary()
 
-# # 9
-acc = history.history['accuracy']
-val_acc = history.history['val_accuracy']
+# 9
+acc = history.history['accuracy'] # from orignal if using model.fit()
+val_acc = history.history['val_accuracy'] # from orignal if using model.fit()
 
-loss = history.history['loss']
-val_loss = history.history['val_loss']
+loss = history.history['loss'] # from orignal if using model.fit()
+val_loss = history.history['val_loss'] # from orignal if using model.fit()
 
 epochs_range = range(epochs)
 
@@ -148,12 +147,36 @@ plt.legend(loc='upper right')
 plt.title('Training and Validation Loss')
 plt.show()
 
-# # 10
-# predictions = model.predict(test_data_gen)
-# probabilities = []
-# for prediction in predictions:
-#     if prediction[0] < prediction[1]:
-#         probabilities.append(1)
-#     else:
-#         probabilities.append(0)
-# print(len(probabilities))
+# 10
+predictions = model.predict(test_data_gen)
+probabilities = []
+for prediction in predictions:
+    if prediction[0] < prediction[1]:
+        probabilities.append(1)
+    else:
+        probabilities.append(0)
+print(len(probabilities))
+
+# 11
+answers =  [1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0,
+            1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0,
+            1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1,
+            1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 
+            0, 0, 0, 0, 0, 0]
+
+correct = 0
+
+for probability, answer in zip(probabilities, answers):
+    if round(probability) == answer:
+        correct +=1
+
+percentage_identified = (correct / len(answers)) * 100
+
+passed_challenge = percentage_identified >= 63
+
+print(f"Your model correctly identified {round(percentage_identified, 2)}% of the images of cats and dogs.")
+
+if passed_challenge:
+    print("You passed the challenge!")
+else:
+    print("You haven't passed yet. Your model should identify at least 63% of the images. Keep trying. You will get it!")
